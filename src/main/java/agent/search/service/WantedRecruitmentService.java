@@ -1,8 +1,10 @@
 package agent.search.service;
 
 import agent.search.dto.RecruitmentDto;
+import agent.search.entity.JobPlanetCompany;
 import agent.search.entity.MilitaryCompany;
 import agent.search.entity.Recruitment;
+import agent.search.repository.JobPlanetCompanyRepository;
 import agent.search.repository.RecruitmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,15 +15,21 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class WantedRecruitmentService implements RecruitmentService {
 
-    private final RecruitmentRepository repository;
+    private final RecruitmentRepository recruitmentRepository;
+
+    private final JobPlanetCompanyRepository jobPlanetRepository;
 
     public Page<RecruitmentDto> findByPaging(int page, int pageSize) {
         PageRequest pagingRequest = PageRequest.of(page, pageSize);
-        Page<Recruitment> foundRecruitments = repository.findAll(pagingRequest);
+        Page<Recruitment> foundRecruitments = recruitmentRepository.findAll(pagingRequest);
 
         return foundRecruitments.map((recruitment -> {
             MilitaryCompany company = recruitment.getCompany();
             Integer remainNumber = company.getRemainNumber();
+
+            JobPlanetCompany jobPlanetCompany = jobPlanetRepository.findByCompany(company);
+            String originLink = jobPlanetCompany != null ? jobPlanetCompany.getOriginLink() : null;
+            String averageReview = jobPlanetCompany != null ? jobPlanetCompany.getAverageReviews() : null;
 
             return RecruitmentDto.builder()
                     .companyName(company.getName())
@@ -29,8 +37,10 @@ public class WantedRecruitmentService implements RecruitmentService {
                     .companyLocation(company.getLocation())
                     .companyLogoPath(recruitment.getCompanyLogoPath())
                     .jobPosition(recruitment.getJobPosition())
-                    .originLink(recruitment.getOriginLink())
+                    .wantedOriginLink(recruitment.getOriginLink())
                     .activeRemainNumber(remainNumber)
+                    .jobPlanetOriginLink(originLink)
+                    .jobPlanetScore(averageReview)
                     .build();
         }));
     }

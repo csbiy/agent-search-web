@@ -11,7 +11,7 @@ public class RecruitmentDto {
 
     private String companyName;
 
-    private String originLink;
+    private String wantedOriginLink;
 
     private String companyLogoPath;
 
@@ -25,5 +25,9 @@ public class RecruitmentDto {
      * 현역 복무 인원 TO 개수
      */
     private Integer activeRemainNumber;
+
+    private String jobPlanetScore;
+
+    private String jobPlanetOriginLink;
 
 }

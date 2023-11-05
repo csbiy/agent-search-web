@@ -209,14 +209,18 @@
                           <figure class="effect-ming tm-video-item">
                               <img src="#{COMPANY_LOGO}#" alt="Image" class="img-fluid">
                               <figcaption class="d-flex align-items-center justify-content-center">
-                                  <h2>Plants</h2>
-                                  <a href=#{ORIGIN_LINK}#>View more</a>
+
+                                  <h2><span>잡플래닛 평점</span>
+                                      <br/>
+                                      <span>#{JOBPLANET_REVIEW}#</span>
+                                  </h2>
+                                  <a href=#{WANTED_ORIGIN_LINK}#>View more</a>
                               </figcaption>
                           </figure>
                           <div class="d-flex justify-content-between tm-text-gray">
                               <span class="tm-text-gray-light">#{CREATE_YEAR}#</span>
                               <span>#{JOB_POSITION}#</span>
-                              <span>#{COMPANY_NAME}#</span>
+                              <span><a href=#{JOBPLANET_ORIGIN_LINK}#>#{COMPANY_NAME}#</a></span>
                           </div>
               </div>
     `
@@ -266,15 +270,20 @@
                 },
             }).then((resp) => {
                 const data = resp.data
+                console.log(data)
                 const dom = document.querySelector("#list-container");
                 dom.innerHTML = '';
                 data.content.forEach((job) => {
+                        const averageScore = job.jobPlanetScore === null ? "확인불가" : job.jobPlanetScore.slice(0,3);
+                        const jobPlanetOriginLink = job.jobPlanetOriginLink === null ? "javascript:void(0);" : job.jobPlanetOriginLink;
                         dom.innerHTML += (
                             TEMPLATE.replace("#{COMPANY_LOGO}#", job.companyLogoPath)
                                 .replace("#{JOB_POSITION}#", job.jobPosition)
-                                .replace("#{ORIGIN_LINK}#", job.originLink)
+                                .replace("#{WANTED_ORIGIN_LINK}#", job.wantedOriginLink)
                                 .replace("#{CREATE_YEAR}#", job.createYear)
                                 .replace("#{COMPANY_NAME}#", job.companyName)
+                                .replace("#{JOBPLANET_REVIEW}#", averageScore)
+                                .replace("#{JOBPLANET_ORIGIN_LINK}#", jobPlanetOriginLink)
                         );
                     }
                 )
