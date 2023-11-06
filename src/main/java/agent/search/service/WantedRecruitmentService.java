@@ -1,6 +1,7 @@
 package agent.search.service;
 
-import agent.search.dto.RecruitmentDto;
+import agent.search.dto.request.RecruitmentSearchRequest;
+import agent.search.dto.response.RecruitmentResponse;
 import agent.search.entity.JobPlanetCompany;
 import agent.search.entity.MilitaryCompany;
 import agent.search.entity.Recruitment;
@@ -19,7 +20,7 @@ public class WantedRecruitmentService implements RecruitmentService {
 
     private final JobPlanetCompanyRepository jobPlanetRepository;
 
-    public Page<RecruitmentDto> findByPaging(int page, int pageSize) {
+    public Page<RecruitmentResponse> findByPaging(int page, int pageSize) {
         PageRequest pagingRequest = PageRequest.of(page, pageSize);
         Page<Recruitment> foundRecruitments = recruitmentRepository.findAll(pagingRequest);
 
@@ -31,17 +32,24 @@ public class WantedRecruitmentService implements RecruitmentService {
             String originLink = jobPlanetCompany != null ? jobPlanetCompany.getOriginLink() : null;
             String averageReview = jobPlanetCompany != null ? jobPlanetCompany.getAverageReviews() : null;
 
-            return RecruitmentDto.builder()
-                    .companyName(company.getName())
-                    .createYear(company.getYear())
-                    .companyLocation(company.getLocation())
-                    .companyLogoPath(recruitment.getCompanyLogoPath())
-                    .jobPosition(recruitment.getJobPosition())
-                    .wantedOriginLink(recruitment.getOriginLink())
-                    .activeRemainNumber(remainNumber)
-                    .jobPlanetOriginLink(originLink)
-                    .jobPlanetScore(averageReview)
-                    .build();
+            return RecruitmentResponse.builder()
+                                      .companyName(company.getName())
+                                      .createYear(company.getYear())
+                                      .companyLocation(company.getLocation())
+                                      .companyLogoPath(recruitment.getCompanyLogoPath())
+                                      .jobPosition(recruitment.getJobPosition())
+                                      .wantedOriginLink(recruitment.getOriginLink())
+                                      .activeRemainNumber(remainNumber)
+                                      .jobPlanetOriginLink(originLink)
+                                      .jobPlanetScore(averageReview)
+                                      .build();
         }));
+    }
+
+    @Override
+    public Page<RecruitmentResponse> findBySearch(RecruitmentSearchRequest request) {
+
+
+        return null;
     }
 }

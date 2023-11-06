@@ -1,4 +1,4 @@
-package agent.search.dto;
+package agent.search.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 @Getter
-public class RecruitmentDto {
+public class RecruitmentResponse {
 
     private String companyName;
 
