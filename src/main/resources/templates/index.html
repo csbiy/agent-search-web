@@ -201,10 +201,11 @@
     <script>
         const PAGE_NUMBER = 4;
         const PAGE_SIZE = 16
+        const domParser = new DOMParser();
         let currentPage = 0;
         let totalPage = 0;
 
-        const TEMPLATE = `
+        const JOB_CARD_TEMPLATE = `
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
                           <figure class="effect-ming tm-video-item">
                               <img src="#{COMPANY_LOGO}#" alt="Image" class="img-fluid">
@@ -224,9 +225,8 @@
                           </div>
               </div>
     `
-        const PAGE_TEMPLATE = `
-    <a class="tm-paging-link" data-value="#{PAGE_NUM}#">#{PAGE_NUM}#</a>
-    `
+        const PAGE_TEMPLATE = `<a class="tm-paging-link" data-value="#{PAGE_NUM}#">#{PAGE_NUM}#</a>`
+
         window.addEventListener("load", () => {
             sendPagingRequest(0)
             document.body.classList.add("loaded");
@@ -234,7 +234,9 @@
 
         const paging = document.querySelector('.tm-paging');
         for (let i = 0; i < PAGE_NUMBER; i++) {
-            paging.innerHTML += (PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i + 1));
+            const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i + 1);
+            const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
+            paging.appendChild(pageElement);
         }
 
         const prevBtn = document.querySelector('.tm-btn-prev');
@@ -269,22 +271,21 @@
                     pageSize: PAGE_SIZE,
                 },
             }).then((resp) => {
-                const data = resp.data
-                console.log(data)
-                const dom = document.querySelector("#list-container");
-                dom.innerHTML = '';
+                const data = resp.data;
+                const jobCardContainer = document.querySelector("#list-container");
+                jobCardContainer.textContent = '';
                 data.content.forEach((job) => {
-                        const averageScore = job.jobPlanetScore === null ? "확인불가" : job.jobPlanetScore.slice(0,3);
+                        const averageScore = job.jobPlanetScore === null ? "확인불가" : job.jobPlanetScore.slice(0, 3);
                         const jobPlanetOriginLink = job.jobPlanetOriginLink === null ? "javascript:void(0);" : job.jobPlanetOriginLink;
-                        dom.innerHTML += (
-                            TEMPLATE.replace("#{COMPANY_LOGO}#", job.companyLogoPath)
-                                .replace("#{JOB_POSITION}#", job.jobPosition)
-                                .replace("#{WANTED_ORIGIN_LINK}#", job.wantedOriginLink)
-                                .replace("#{CREATE_YEAR}#", job.createYear)
-                                .replace("#{COMPANY_NAME}#", job.companyName)
-                                .replace("#{JOBPLANET_REVIEW}#", averageScore)
-                                .replace("#{JOBPLANET_ORIGIN_LINK}#", jobPlanetOriginLink)
-                        );
+                        const jobCardFragment = JOB_CARD_TEMPLATE.replace("#{COMPANY_LOGO}#", job.companyLogoPath)
+                            .replace("#{JOB_POSITION}#", job.jobPosition)
+                            .replace("#{WANTED_ORIGIN_LINK}#", job.wantedOriginLink)
+                            .replace("#{CREATE_YEAR}#", job.createYear)
+                            .replace("#{COMPANY_NAME}#", job.companyName)
+                            .replace("#{JOBPLANET_REVIEW}#", averageScore)
+                            .replace("#{JOBPLANET_ORIGIN_LINK}#", jobPlanetOriginLink);
+                        const jobCardElement = domParser.parseFromString(jobCardFragment, 'text/html').body.firstChild;
+                        jobCardContainer.appendChild(jobCardElement);
                     }
                 )
                 currentPage = data.pageable.pageNumber
@@ -293,17 +294,21 @@
                 const firstPageNumber = Number(paging.firstElementChild.getAttribute('data-value'));
                 const lastPageNumber = firstPageNumber + PAGE_NUMBER;
                 if (firstPageNumber > currentPage + 1) {
-                    paging.innerHTML = '';
+                    paging.textContent = '';
                     const nextBound = currentPage + 1 - PAGE_NUMBER
                     for (let i = currentPage + 1; i > nextBound && i >= 0; i--) {
-                        paging.innerHTML = (PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i)) + paging.innerHTML;
+                        const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i);
+                        const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
+                        paging.prepend(pageElement);
                     }
                 }
                 if (lastPageNumber <= currentPage + 1) {
-                    paging.innerHTML = '';
+                    paging.textContent = '';
                     const nextBound = currentPage + 1 + PAGE_NUMBER
                     for (let i = currentPage + 1; i < nextBound && i <= totalPage; i++) {
-                        paging.innerHTML += (PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i));
+                        const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i);
+                        const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
+                        paging.appendChild(pageElement);
                     }
                 }
                 paging.querySelectorAll('a').forEach((dom) => {
