@@ -4,6 +4,7 @@ const PAGE_SIZE = 16
 const domParser = new DOMParser();
 let currentPage = 0;
 let totalPage = 0;
+let isSearching = false;
 
 const JOB_CARD_TEMPLATE = `
             <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
@@ -66,71 +67,22 @@ nextBtn.addEventListener('click', () => {
 
 document.querySelector("#search-btn")
     .addEventListener('click',()=>{
+        isSearching = false;
         searchJobRequest();
     })
 
 function sendPagingRequest(page) {
+    if (isSearching){
+        searchJobRequest();
+        return;
+    }
     axios.get("/api/recruitments", {
         params: {
             page: page,
             pageSize: PAGE_SIZE,
         },
-    }).then((resp) => {
-        const data = resp.data;
-        const jobCardContainer = document.querySelector("#list-container");
-        jobCardContainer.textContent = '';
-        data.content.forEach((job) => {
-                const averageScore = job.jobPlanetScore === null ? "확인불가" : job.jobPlanetScore.slice(0, 3);
-                const jobPlanetOriginLink = job.jobPlanetOriginLink === null ? "javascript:void(0);" : job.jobPlanetOriginLink;
-                const jobCardFragment = JOB_CARD_TEMPLATE.replace("#{COMPANY_LOGO}#", job.companyLogoPath)
-                    .replace("#{JOB_POSITION}#", job.jobPosition)
-                    .replace("#{WANTED_ORIGIN_LINK}#", job.wantedOriginLink)
-                    .replace("#{CREATE_YEAR}#", job.createYear)
-                    .replace("#{COMPANY_NAME}#", job.companyName)
-                    .replace("#{JOBPLANET_REVIEW}#", averageScore)
-                    .replace("#{JOBPLANET_ORIGIN_LINK}#", jobPlanetOriginLink);
-                const jobCardElement = domParser.parseFromString(jobCardFragment, 'text/html').body.firstChild;
-                jobCardContainer.appendChild(jobCardElement);
-            }
-        )
-        currentPage = data.pageable.pageNumber
-        totalPage = data.totalPages;
-
-        const firstPageNumber = Number(paging.firstElementChild.getAttribute('data-value'));
-        const lastPageNumber = firstPageNumber + PAGE_NUMBER;
-        if (firstPageNumber > currentPage + 1) {
-            paging.textContent = '';
-            const nextBound = currentPage + 1 - PAGE_NUMBER
-            for (let i = currentPage + 1; i > nextBound && i >= 0; i--) {
-                const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i);
-                const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
-                paging.prepend(pageElement);
-            }
-        }
-        if (lastPageNumber <= currentPage + 1) {
-            paging.textContent = '';
-            const nextBound = currentPage + 1 + PAGE_NUMBER
-            for (let i = currentPage + 1; i < nextBound && i <= totalPage; i++) {
-                const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i);
-                const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
-                paging.appendChild(pageElement);
-            }
-        }
-        paging.querySelectorAll('a').forEach((dom) => {
-            if (Number(dom.getAttribute("data-value")) === (currentPage + 1)) {
-                dom.classList.add('active');
-            } else {
-                dom.classList.remove('active');
-            }
-        });
-        document.querySelectorAll(".tm-paging-link")
-            .forEach((dom) => {
-                dom.addEventListener('click', () => {
-                    sendPagingRequest(dom.getAttribute("data-value") - 1)
-                    document.querySelectorAll(".tm-paging-link").forEach((dom) => dom.classList.remove("active"));
-                    dom.classList.add("active");
-                })
-            });
+    }).then((res) => {
+        handle(res);
     });
 }
 
@@ -143,6 +95,70 @@ function searchJobRequest(){
     axios.post("/api/recruitments",{
         'searchTerm': searchInput.value,
         'filters': checkFilters,
+        'pageSize': PAGE_SIZE,
+        'page': isSearching ? currentPage : 0
     })
-    .then((data)=>console.log(data));
+    .then((res)=> {
+        isSearching= true;
+        handle(res)
+    });
+}
+
+
+function handle(res){
+    const data = res.data;
+    const jobCardContainer = document.querySelector("#list-container");
+    jobCardContainer.textContent = '';
+    data.content.forEach((job) => {
+            const averageScore = job.jobPlanetScore === null ? "확인불가" : job.jobPlanetScore.slice(0, 3);
+            const jobPlanetOriginLink = job.jobPlanetOriginLink === null ? "javascript:void(0);" : job.jobPlanetOriginLink;
+            const jobCardFragment = JOB_CARD_TEMPLATE.replace("#{COMPANY_LOGO}#", job.companyLogoPath)
+                .replace("#{JOB_POSITION}#", job.jobPosition)
+                .replace("#{WANTED_ORIGIN_LINK}#", job.wantedOriginLink)
+                .replace("#{CREATE_YEAR}#", job.createYear)
+                .replace("#{COMPANY_NAME}#", job.companyName)
+                .replace("#{JOBPLANET_REVIEW}#", averageScore)
+                .replace("#{JOBPLANET_ORIGIN_LINK}#", jobPlanetOriginLink);
+            const jobCardElement = domParser.parseFromString(jobCardFragment, 'text/html').body.firstChild;
+            jobCardContainer.appendChild(jobCardElement);
+        }
+    )
+    currentPage = data.pageable.pageNumber
+    totalPage = data.totalPages;
+
+    const firstPageNumber = Number(paging.firstElementChild.getAttribute('data-value'));
+    const lastPageNumber = firstPageNumber + PAGE_NUMBER;
+    if (firstPageNumber > currentPage + 1) {
+        paging.textContent = '';
+        const nextBound = currentPage + 1 - PAGE_NUMBER
+        for (let i = currentPage + 1; i > nextBound && i >= 0; i--) {
+            const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i);
+            const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
+            paging.prepend(pageElement);
+        }
+    }
+    if (lastPageNumber <= currentPage + 1) {
+        paging.textContent = '';
+        const nextBound = currentPage + 1 + PAGE_NUMBER
+        for (let i = currentPage + 1; i < nextBound && i <= totalPage; i++) {
+            const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i);
+            const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
+            paging.appendChild(pageElement);
+        }
+    }
+    paging.querySelectorAll('a').forEach((dom) => {
+        if (Number(dom.getAttribute("data-value")) === (currentPage + 1)) {
+            dom.classList.add('active');
+        } else {
+            dom.classList.remove('active');
+        }
+    });
+    document.querySelectorAll(".tm-paging-link")
+        .forEach((dom) => {
+            dom.addEventListener('click', () => {
+                sendPagingRequest(dom.getAttribute("data-value") - 1)
+                document.querySelectorAll(".tm-paging-link").forEach((dom) => dom.classList.remove("active"));
+                dom.classList.add("active");
+            })
+        });
 }

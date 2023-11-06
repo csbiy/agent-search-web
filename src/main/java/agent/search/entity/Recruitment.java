@@ -17,11 +17,12 @@ public class Recruitment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Lob
     private String jobPosition;
 
-    private String originLink;
-
     private String companyName;
+
+    private String originLink;
 
     private String companyLogoPath;
 

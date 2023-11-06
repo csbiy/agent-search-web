@@ -12,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class WantedRecruitmentService implements RecruitmentService {
@@ -19,6 +21,8 @@ public class WantedRecruitmentService implements RecruitmentService {
     private final RecruitmentRepository recruitmentRepository;
 
     private final JobPlanetCompanyRepository jobPlanetRepository;
+
+    private final FilterService filterService;
 
     public Page<RecruitmentResponse> findByPaging(int page, int pageSize) {
         PageRequest pagingRequest = PageRequest.of(page, pageSize);
@@ -33,23 +37,25 @@ public class WantedRecruitmentService implements RecruitmentService {
             String averageReview = jobPlanetCompany != null ? jobPlanetCompany.getAverageReviews() : null;
 
             return RecruitmentResponse.builder()
-                                      .companyName(company.getName())
-                                      .createYear(company.getYear())
-                                      .companyLocation(company.getLocation())
-                                      .companyLogoPath(recruitment.getCompanyLogoPath())
-                                      .jobPosition(recruitment.getJobPosition())
-                                      .wantedOriginLink(recruitment.getOriginLink())
-                                      .activeRemainNumber(remainNumber)
-                                      .jobPlanetOriginLink(originLink)
-                                      .jobPlanetScore(averageReview)
-                                      .build();
+                    .companyName(company.getName())
+                    .createYear(company.getYear())
+                    .companyLocation(company.getLocation())
+                    .companyLogoPath(recruitment.getCompanyLogoPath())
+                    .jobPosition(recruitment.getJobPosition())
+                    .wantedOriginLink(recruitment.getOriginLink())
+                    .activeRemainNumber(remainNumber)
+                    .jobPlanetOriginLink(originLink)
+                    .jobPlanetScore(averageReview)
+                    .build();
         }));
     }
 
     @Override
     public Page<RecruitmentResponse> findBySearch(RecruitmentSearchRequest request) {
+        List<String> filters = request.getFilters();
+        List<String> keywords = filterService.getKeywords(filters);
+        PageRequest pageRequest = PageRequest.of(request.getPage(), request.getPageSize());
 
-
-        return null;
+        return recruitmentRepository.searchByCondition(keywords, request.getSearchTerm(), pageRequest);
     }
 }
