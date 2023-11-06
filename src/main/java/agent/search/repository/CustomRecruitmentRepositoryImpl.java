@@ -69,7 +69,7 @@ public class CustomRecruitmentRepositoryImpl implements CustomRecruitmentReposit
                 ).from(recruitment)
                 .innerJoin(militaryCompany).on(militaryCompany.eq(recruitment.company))
                 .leftJoin(jobPlanetCompany).on(jobPlanetCompany.company.eq(militaryCompany))
-                .where(isSearchTermMatch(searchTerm).and(isFilterMatch(keywords)))
+                .where(isSearchTermMatch(searchTerm),(isFilterMatch(keywords)))
                 ;
     }
 

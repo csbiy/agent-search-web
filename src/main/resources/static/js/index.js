@@ -137,7 +137,7 @@ function handle(res){
             paging.prepend(pageElement);
         }
     }
-    if (lastPageNumber <= currentPage + 1) {
+    else if (lastPageNumber <= currentPage + 1) {
         paging.textContent = '';
         const nextBound = currentPage + 1 + PAGE_NUMBER
         for (let i = currentPage + 1; i < nextBound && i <= totalPage; i++) {
