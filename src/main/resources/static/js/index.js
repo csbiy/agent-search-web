@@ -1,13 +1,11 @@
-
 const PAGE_NUMBER = 4;
 const PAGE_SIZE = 16
 const domParser = new DOMParser();
 let currentPage = 0;
 let totalPage = 0;
 let isSearching = false;
-
-const JOB_CARD_TEMPLATE = `
-            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
+const JOB_CARD_TEMPLATE =
+    `<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-5">
                           <figure class="effect-ming tm-video-item">
                               <img src="#{COMPANY_LOGO}#" alt="Image" class="img-fluid">
                               <figcaption class="d-flex align-items-center justify-content-center">
@@ -24,8 +22,7 @@ const JOB_CARD_TEMPLATE = `
                               <span>#{JOB_POSITION}#</span>
                               <span><a href=#{JOBPLANET_ORIGIN_LINK}#>#{COMPANY_NAME}#</a></span>
                           </div>
-              </div>
-    `
+              </div>`
 const PAGE_TEMPLATE = `<a class="tm-paging-link" data-value="#{PAGE_NUM}#">#{PAGE_NUM}#</a>`
 
 window.addEventListener("load", () => {
@@ -34,45 +31,41 @@ window.addEventListener("load", () => {
 });
 
 const paging = document.querySelector('.tm-paging');
-for (let i = 0; i < PAGE_NUMBER; i++) {
-    const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i + 1);
-    const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
-    paging.appendChild(pageElement);
-}
-
 const prevBtn = document.querySelector('.tm-btn-prev');
-prevBtn.addEventListener('click', () => {
-        if (currentPage <= 0) {
-            currentPage = 0;
-            prevBtn.classList.add("disabled");
-            return;
-        }
-        nextBtn.classList.remove("disabled");
-        currentPage--;
-        sendPagingRequest(currentPage)
-    }
-)
+prevBtn.addEventListener('click', () => decreasePage());
 const nextBtn = document.querySelector('.tm-btn-next');
-nextBtn.addEventListener('click', () => {
-        if (currentPage + 1 >= totalPage) {
-            currentPage = totalPage;
-            nextBtn.classList.add("disabled");
-            return;
-        }
-        prevBtn.classList.remove("disabled")
-        currentPage++;
-        sendPagingRequest(currentPage)
-    }
-)
-
+nextBtn.addEventListener('click', () => increasePage())
 document.querySelector("#search-btn")
-    .addEventListener('click',()=>{
+    .addEventListener('click', () => {
         isSearching = false;
         searchJobRequest();
     })
 
+
+function increasePage() {
+    if (currentPage + 1 >= totalPage) {
+        currentPage = totalPage;
+        nextBtn.classList.add("disabled");
+        return;
+    }
+    prevBtn.classList.remove("disabled")
+    currentPage++;
+    sendPagingRequest(currentPage)
+}
+
+function decreasePage() {
+    if (currentPage <= 0) {
+        currentPage = 0;
+        prevBtn.classList.add("disabled");
+        return;
+    }
+    nextBtn.classList.remove("disabled");
+    currentPage--;
+    sendPagingRequest(currentPage)
+}
+
 function sendPagingRequest(page) {
-    if (isSearching){
+    if (isSearching) {
         searchJobRequest();
         return;
     }
@@ -87,25 +80,25 @@ function sendPagingRequest(page) {
 }
 
 
-function searchJobRequest(){
+function searchJobRequest() {
     const elements = document.querySelectorAll("#filters .form-check-input:checked");
     const checkFilters = Array.from(elements).map(element => element.value);
     const searchInput = document.querySelector("#search-input");
 
-    axios.post("/api/recruitments",{
+    axios.post("/api/recruitments", {
         'searchTerm': searchInput.value,
         'filters': checkFilters,
         'pageSize': PAGE_SIZE,
         'page': isSearching ? currentPage : 0
     })
-    .then((res)=> {
-        isSearching= true;
-        handle(res)
-    });
+        .then((res) => {
+            isSearching = true;
+            handle(res)
+        });
 }
 
 
-function handle(res){
+function handle(res) {
     const data = res.data;
     const jobCardContainer = document.querySelector("#list-container");
     jobCardContainer.textContent = '';
@@ -126,26 +119,19 @@ function handle(res){
     currentPage = data.pageable.pageNumber
     totalPage = data.totalPages;
 
-    const firstPageNumber = Number(paging.firstElementChild.getAttribute('data-value'));
-    const lastPageNumber = firstPageNumber + PAGE_NUMBER;
-    if (firstPageNumber > currentPage + 1) {
-        paging.textContent = '';
-        const nextBound = currentPage + 1 - PAGE_NUMBER
-        for (let i = currentPage + 1; i > nextBound && i >= 0; i--) {
-            const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i);
-            const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
-            paging.prepend(pageElement);
-        }
+    let startPage = Math.floor((currentPage + 1) / PAGE_NUMBER) * PAGE_NUMBER;
+    let lastPage = Math.ceil((currentPage + 1) / PAGE_NUMBER) * PAGE_NUMBER;
+    lastPage = lastPage > totalPage ? totalPage : lastPage
+    startPage = startPage === lastPage ? startPage - PAGE_NUMBER : startPage
+
+
+    paging.textContent = '';
+    for (let i = startPage + 1; i <= lastPage; i++) {
+        const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i);
+        const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
+        paging.appendChild(pageElement);
     }
-    else if (lastPageNumber <= currentPage + 1) {
-        paging.textContent = '';
-        const nextBound = currentPage + 1 + PAGE_NUMBER
-        for (let i = currentPage + 1; i < nextBound && i <= totalPage; i++) {
-            const pageHTML = PAGE_TEMPLATE.replaceAll("#{PAGE_NUM}#", i);
-            const pageElement = domParser.parseFromString(pageHTML, 'text/html').body.firstChild;
-            paging.appendChild(pageElement);
-        }
-    }
+
     paging.querySelectorAll('a').forEach((dom) => {
         if (Number(dom.getAttribute("data-value")) === (currentPage + 1)) {
             dom.classList.add('active');
