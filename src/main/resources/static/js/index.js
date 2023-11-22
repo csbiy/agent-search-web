@@ -122,8 +122,7 @@ function handle(res) {
     let startPage = Math.floor((currentPage + 1) / PAGE_NUMBER) * PAGE_NUMBER;
     let lastPage = Math.ceil((currentPage + 1) / PAGE_NUMBER) * PAGE_NUMBER;
     lastPage = lastPage > totalPage ? totalPage : lastPage
-    startPage = startPage === lastPage ? startPage - PAGE_NUMBER : startPage
-
+    startPage = startPage === lastPage && startPage !== 0 ? startPage - PAGE_NUMBER : startPage
 
     paging.textContent = '';
     for (let i = startPage + 1; i <= lastPage; i++) {
