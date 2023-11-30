@@ -52,10 +52,10 @@ public class WantedRecruitmentService implements RecruitmentService {
 
     @Override
     public Page<RecruitmentResponse> findBySearch(RecruitmentSearchRequest request) {
-        List<String> filters = request.getFilters();
+        List<String> filters = request.filters();
         List<String> keywords = filterService.getKeywords(filters);
-        PageRequest pageRequest = PageRequest.of(request.getPage(), request.getPageSize());
+        PageRequest pageRequest = PageRequest.of(request.page(), request.pageSize());
 
-        return recruitmentRepository.searchByCondition(keywords, request.getSearchTerm(), pageRequest);
+        return recruitmentRepository.searchByCondition(keywords, request.searchTerm(), pageRequest);
     }
 }

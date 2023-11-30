@@ -14,7 +14,7 @@ public class Statistic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long statisticKey;
+    private Long id;
 
     private String property;
 

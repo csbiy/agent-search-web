@@ -53,18 +53,20 @@ public class CustomRecruitmentRepositoryImpl implements CustomRecruitmentReposit
     private JPAQuery<RecruitmentResponse> searchQuery(String searchTerm, List<String> keywords) {
         return queryFactory.select(
                         Projections.constructor(RecruitmentResponse.class,
-                                militaryCompany.name,
-                                recruitment.originLink,
-                                recruitment.companyLogoPath,
-                                recruitment.jobPosition,
-                                militaryCompany.year,
-                                militaryCompany.location,
-                                militaryCompany.activeAssignedNum.subtract(militaryCompany.activeEnlistNum),
-                                ExpressionUtils.as(
-                                        JPAExpressions.select(jobPlanetReview.reviewScore.avg().stringValue())
-                                                .from(jobPlanetReview)
-                                                .where(jobPlanetReview.jobPlanetCompany.eq(jobPlanetCompany)), "average"),
-                                jobPlanetCompany.originLink
+                                                militaryCompany.name,
+                                                recruitment.originLink,
+                                                recruitment.companyLogoPath,
+                                                recruitment.jobPosition,
+                                                militaryCompany.year,
+                                                militaryCompany.location,
+                                                militaryCompany.activeAssignedNum.subtract(militaryCompany.activeEnlistNum),
+                                                ExpressionUtils.as(
+                                                        JPAExpressions.select(jobPlanetReview.reviewScore.avg()
+                                                                                                         .stringValue())
+                                                                      .from(jobPlanetReview)
+                                                                      .where(jobPlanetReview.jobPlanetCompany.eq(jobPlanetCompany)), "average"
+                                                ),
+                                                jobPlanetCompany.originLink
                         )
                 ).from(recruitment)
                 .innerJoin(militaryCompany).on(militaryCompany.eq(recruitment.company))

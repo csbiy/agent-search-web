@@ -2,14 +2,8 @@ package agent.search.dto.response;
 
 
 import agent.search.enumeration.StatisticTarget;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
-@AllArgsConstructor
-@Getter
-public class StatisticResponse {
+public record StatisticResponse(StatisticTarget target,
+                                Integer value) {
 
-    private final StatisticTarget target;
-
-    private final Integer value;
 }
