@@ -33,17 +33,32 @@ public class StatisticService {
             log.error("statistic data does not exist on date between [{}] ~ [{}]", today, firstDayOfMonth);
             return Collections.emptyList();
         }
-        Statistic todayStatistic = foundStatistics.remove(0);
-        StatisticResponse response = StatisticMapper.map(todayStatistic, StatisticDateType.TODAY);
+        // TODO : 일급 컬렉션을 사용하도록 리팩토링
+        getFirstOfProperty(foundStatistics, StatisticProperty.ACTIVE_ENLIST_NUM);
+        getFirstOfProperty(foundStatistics, StatisticProperty.SUPP_ENLIST_NUM);
 
-        int activeEnlistSum = getSumOfProperty(foundStatistics, StatisticProperty.ACTIVE_ENLIST_NUM);
         int suppEnlistSum = getSumOfProperty(foundStatistics, StatisticProperty.ACTIVE_ENLIST_NUM);
-        return null;
+        int activeEnlistSum = getSumOfProperty(foundStatistics, StatisticProperty.SUPP_ENLIST_NUM);
+        StatisticResponse activeEnlistResponse = StatisticResponse.fromProperty(StatisticDateType.MONTH, StatisticProperty.ACTIVE_ENLIST_NUM, activeEnlistSum);
+        StatisticResponse suppEnlistResponse = StatisticResponse.fromProperty(StatisticDateType.MONTH, StatisticProperty.SUPP_ENLIST_NUM, suppEnlistSum);
+
+        return List.of(response,activeEnlistResponse,suppEnlistResponse);
     }
 
     private int getSumOfProperty(List<Statistic> foundStatistics, StatisticProperty property) {
         return foundStatistics.stream().filter(statistic -> statistic.isSameProperty(property))
                               .mapToInt(statistic -> Integer.parseInt(statistic.getValue()))
                               .sum();
+    }
+
+    private int getFirstOfProperty(List<Statistic> foundStatistics, StatisticProperty property) {
+        return foundStatistics.stream()
+                .filter(statistic -> statistic.isSameProperty(property))
+                .findFirst()
+                .stream()
+                .mapToInt(statistic ->
+                    Integer.parseInt(statistic.getValue()))
+                .findFirst()
+                .getAsInt();
     }
 }

@@ -32,6 +32,6 @@ public class Statistic {
     }
 
     public boolean isSameProperty(StatisticProperty property) {
-        return this.property.equals(property)
+        return this.property.equals(property);
     }
 }
