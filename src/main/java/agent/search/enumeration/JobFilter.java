@@ -6,15 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Created by P-161 at : 2023-11-06
- * <p>
- * 여기에 JobFilter 열거형에 대한 설명을 기술해주세요
- *
- * @author P-161
- * @version 1.0
- * @since 1.0
- */
+
 @RequiredArgsConstructor
 public enum JobFilter {
 
