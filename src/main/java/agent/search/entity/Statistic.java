@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,11 +25,13 @@ public class Statistic {
 
     private String value;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
-    public Statistic(StatisticProperty property, String value) {
+    @Builder
+    private Statistic(StatisticProperty property, String value, LocalDateTime createdAt) {
         this.property = property;
         this.value = value;
+        this.createdAt = createdAt;
     }
 
     public boolean hasProperty(StatisticProperty property) {

@@ -28,7 +28,10 @@ public class Statistics {
     public List<Statistic> getMonthStatistic() {
         return Stream.of(StatisticProperty.ACTIVE_ENLIST_NUM, StatisticProperty.SUPP_ENLIST_NUM).map((property) -> {
             int sum = getSumOfProperty(property);
-            return new Statistic(property, String.valueOf(sum));
+            return Statistic.builder()
+                            .property(property)
+                            .value(String.valueOf(sum))
+                            .build();
         }).toList();
     }
 
