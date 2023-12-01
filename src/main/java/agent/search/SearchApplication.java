@@ -32,8 +32,6 @@ public class SearchApplication {
                             new Statistic(StatisticProperty.SUPP_ENLIST_NUM, "4")
                     )
             );
-
-
         };
     }
 }

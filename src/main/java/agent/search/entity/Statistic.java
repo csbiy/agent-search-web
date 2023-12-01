@@ -5,10 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,7 +31,11 @@ public class Statistic {
         this.value = value;
     }
 
-    public boolean isSameProperty(StatisticProperty property) {
+    public boolean hasProperty(StatisticProperty property) {
         return this.property.equals(property);
+    }
+
+    public boolean isToday() {
+        return this.createdAt.toLocalDate().isEqual(LocalDate.now());
     }
 }

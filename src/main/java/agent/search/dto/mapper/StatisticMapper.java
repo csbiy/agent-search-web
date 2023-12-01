@@ -5,6 +5,8 @@ import agent.search.entity.Statistic;
 import agent.search.enumeration.StatisticDateType;
 import agent.search.enumeration.StatisticProperty;
 
+import java.util.List;
+
 /**
  * Created by P-161 at : 2023-11-30
  *
@@ -16,9 +18,11 @@ import agent.search.enumeration.StatisticProperty;
  */
 public abstract class StatisticMapper {
 
-    public static StatisticResponse map(Statistic statistic, StatisticDateType dateType) {
-        StatisticProperty property = statistic.getProperty();
-        Integer value = Integer.parseInt(statistic.getValue());
-        return StatisticResponse.fromProperty(dateType, property, value);
+    public static List<StatisticResponse> map(List<Statistic> statistics, StatisticDateType dateType) {
+        return statistics.stream().map(statistic -> {
+            StatisticProperty property = statistic.getProperty();
+            Integer value = Integer.parseInt(statistic.getValue());
+            return StatisticResponse.fromProperty(dateType, property, value);
+        }).toList();
     }
 }
